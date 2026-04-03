@@ -1,0 +1,52 @@
+{
+  "name": "vscode-edit-bdf",
+  "displayName": "BDF Font Editor",
+  "description": "A simple BDF font editor for Visual Studio Code",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.110.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:bdf-font"
+  ],
+  "main": "./dist/extension.js",
+  "browser": "./dist/web/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "bdf-font",
+        "aliases": [
+          "BDF Font"
+        ],
+        "extensions": [
+          ".bdf"
+        ]
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bdf-font",
+        "scopeName": "source.bdf",
+        "path": "./syntaxes/bdf-font.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "build": "tsx build.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.11.0",
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/vscode": "^1.110.0",
+    "esbuild": "^0.27.4",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2"
+  }
+}

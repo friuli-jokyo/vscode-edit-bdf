@@ -1,0 +1,8 @@
+{
+    "name": "Extension Development Container",
+    "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+    "mounts": [
+        "target=${containerWorkspaceFolder}/node_modules,type=volume"
+    ],
+    "postCreateCommand": "sudo chown node node_modules"
+}
