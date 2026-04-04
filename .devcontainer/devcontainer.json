@@ -4,5 +4,12 @@
     "mounts": [
         "target=${containerWorkspaceFolder}/node_modules,type=volume"
     ],
-    "postCreateCommand": "sudo chown node node_modules"
+    "postCreateCommand": "sudo chown node node_modules",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "connor4312.esbuild-problem-matchers"
+            ]
+        }
+    }
 }
