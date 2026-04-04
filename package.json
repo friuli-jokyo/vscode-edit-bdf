@@ -9,6 +9,10 @@
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "bdf",
+    "bdf-font"
+  ],
   "activationEvents": [
     "onLanguage:bdf-font"
   ],
@@ -39,8 +43,11 @@
     "build": "tsx build.mts",
     "watch": "tsx build.mts --watch"
   },
-  "keywords": [],
-  "author": "",
+  "author": "friuli-jokyo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/friuli-jokyo/vscode-edit-bdf.git"
+  },
   "license": "MIT",
   "packageManager": "pnpm@10.11.0",
   "devDependencies": {
