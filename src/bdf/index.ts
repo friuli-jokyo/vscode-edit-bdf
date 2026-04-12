@@ -1,4 +1,4 @@
-import { ParseError } from "./error";
+import { ParseError, Warning } from "./error";
 import { LineIterator } from "./iterator";
 
 type Size = {
@@ -30,10 +30,14 @@ const isMetricsSet = (value: number): value is MetricsSet => {
 const commentDump = (comments: string[], linebreak: string) => {
   return comments.length
     ? comments
-        .map((comment) => (comment ? `COMMENT ${comment}` : "COMMENT"))
-        .join(linebreak) + linebreak
+      .map((comment) => (comment ? `COMMENT ${comment}` : "COMMENT"))
+      .join(linebreak) + linebreak
     : "";
 };
+
+const consoleWarnOnce = ((warning: Warning) => {
+  console.warn(`Warning at line ${warning.line}: ${warning.message}`);
+});
 
 /**
  * BDF font data structure
@@ -68,30 +72,28 @@ class BDFFont {
   }[] = undefined;
   public glyphs: Glyph[] = [];
 
-  static from_string(input: string, warningHandler?: () => void): BDFFont {
+  static from_string(input: string, warningHandler: (warning: Warning) => void = consoleWarnOnce): BDFFont {
     return BDFFont.parse(LineIterator.from_string(input), warningHandler);
   }
 
-  static parse(lines: LineIterator, warningHandler?: () => void): BDFFont {
+  static parse(lines: LineIterator, warningHandler: (warning: Warning) => void = consoleWarnOnce): BDFFont {
     let font = new BDFFont();
     let glyphCount = 0;
-    [font, glyphCount] = BDFFont.__parse_header(font, lines);
+    [font, glyphCount] = BDFFont.__parse_header(font, lines, warningHandler);
     while (true) {
-      const glyph = Glyph.parse(lines);
+      const glyph = Glyph.parse(lines, warningHandler);
       if (!glyph) {
         break;
       }
       font.glyphs.push(glyph);
     }
     if (font.glyphs.length !== glyphCount) {
-      console.warn(
-        `Glyph count mismatch: expected ${glyphCount}, got ${font.glyphs.length}`,
-      );
+      warningHandler(new Warning(lines.lineNumber, `Glyph count mismatch: expected ${glyphCount}, got ${font.glyphs.length}`));
     }
     return font;
   }
 
-  static __parse_header(font: BDFFont, lines: LineIterator): [BDFFont, number] {
+  static __parse_header(font: BDFFont, lines: LineIterator, warningHandler: (warning: Warning) => void = consoleWarnOnce): [BDFFont, number] {
     let tmpComments: string[] = [];
     let glyphCount = null;
     while (true) {
@@ -186,9 +188,7 @@ class BDFFont {
             const { value: line, done } = lines.next();
             if (line.startsWith("ENDPROPERTIES")) {
               if (propertyCounter !== 0) {
-                console.warn(
-                  `Number of properties enumerated (${font.properties.length}) does not match expected (${Number(values[0])})`,
-                );
+                warningHandler(new Warning(lines.lineNumber, `Number of properties enumerated (${font.properties.length}) does not match expected (${Number(values[0])})`));
               }
               break;
             }
@@ -214,7 +214,7 @@ class BDFFont {
           tmpComments = [];
           break;
         default:
-          console.warn(`Unknown key "${key}" at line ${lines.lineNumber}`);
+          warningHandler(new Warning(lines.lineNumber, `Unknown key "${key}"`));
           break;
       }
     }
@@ -293,7 +293,7 @@ class BDFFont {
 class Glyph {
   public comments: Map<keyof this, string[]> = new Map();
   public name: String = "";
-  public encoding: number[] = [-1];
+  public encoding: [number] | [number, number] = [-1];
   public sWidth?: Vec2 = undefined;
   public dWidth?: Vec2 = undefined;
   public sWidth1?: Vec2 = undefined;
@@ -307,7 +307,7 @@ class Glyph {
   };
   public bitmap: string[] = [];
 
-  public static parse(lines: LineIterator): Glyph | null {
+  public static parse(lines: LineIterator, warningHandler: (warning: Warning) => void = consoleWarnOnce): Glyph | null {
     const glyph = new Glyph();
     let tmpComments: string[] = [];
     while (true) {
@@ -326,15 +326,16 @@ class Glyph {
           tmpComments = [];
           break;
         case "ENCODING":
-          glyph.encoding = values.map(Number);
-          glyph.comments.set("encoding", tmpComments);
-          tmpComments = [];
-          if (glyph.encoding.length === 0 || glyph.encoding.length > 2) {
+          const encodingValues = values.map(Number);
+          if (!(encodingValues.length === 1 || encodingValues.length === 2)) {
             throw new ParseError(
               lines.lineNumber,
               "Invalid number of encoding values",
             );
           }
+          glyph.encoding = encodingValues as [number] | [number, number];
+          glyph.comments.set("encoding", tmpComments);
+          tmpComments = [];
           if (glyph.encoding.length === 2 && glyph.encoding[0] !== -1) {
             throw new ParseError(
               lines.lineNumber,
@@ -402,7 +403,7 @@ class Glyph {
         case "ENDFONT":
           return null;
         default:
-          console.warn(`Unknown key "${key}" at line ${lines.lineNumber}`);
+          warningHandler(new Warning(lines.lineNumber, `Unknown key "${key}"`));
           break;
       }
     }
@@ -444,4 +445,4 @@ class Glyph {
   }
 }
 
-export { BDFFont, Glyph };
+export { BDFFont, Glyph, Size, BoundingBox, Vec2, MetricsSet };

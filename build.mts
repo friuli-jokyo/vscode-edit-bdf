@@ -14,12 +14,12 @@ const watch = process.argv.includes('--watch');
 const esbuildProblemMatcherPlugin = {
   name: 'esbuild-problem-matcher',
 
-  setup(build) {
+  setup(build: any) {
     build.onStart(() => {
       console.log('[watch] build started');
     });
-    build.onEnd(result => {
-      result.errors.forEach(({ text, location }) => {
+    build.onEnd((result: any) => {
+      result.errors.forEach(({ text, location }: { text: any; location: any }) => {
         console.error(`✘ [ERROR] ${text}`);
         if (location == null) return;
         console.error(`    ${location.file}:${location.line}:${location.column}:`);
@@ -60,12 +60,41 @@ const webCtx = await context({
     ],
 });
 
+const webViewEntryPoints = [
+    "src/webview/glyph-list-view.ts",
+];
+
+const webViewBuilds = await Promise.all(webViewEntryPoints.map((entry) => {
+    return context({
+        entryPoints: [entry],
+        bundle: true,
+        format: 'iife',
+        minify: production,
+        sourcemap: !production,
+        platform: "browser",
+        target: "es2020",
+        outfile: `dist/webview/${entry.split('/').slice(-1)[0].replace('.ts', '.js')}`,
+        external: ["vscode"],
+        plugins: [esbuildProblemMatcherPlugin],
+        loader: {
+            ".woff": "file",
+            ".woff2": "file",
+        }
+    });
+}));
+
+
 if (watch) {
-    Promise.all([nodeCtx.watch(), webCtx.watch()]);
+    Promise.all([nodeCtx.watch(), webCtx.watch(), ...webViewBuilds.map((ctx) => ctx.watch())]);
 } else {
     await nodeCtx.rebuild();
     await nodeCtx.dispose();
 
     await webCtx.rebuild();
     await webCtx.dispose();
+
+    for (const ctx of webViewBuilds) {
+        await ctx.rebuild();
+        await ctx.dispose();
+    }
 }

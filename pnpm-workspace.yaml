@@ -1,2 +1,4 @@
 onlyBuiltDependencies:
-  - '@playwright/browser-chromium'
+  - esbuild
+patchedDependencies:
+  '@lit-labs/virtualizer': patches/@lit-labs__virtualizer.patch

@@ -4,3 +4,13 @@ export class ParseError extends Error {
     this.name = "ParseError";
   }
 }
+
+export class Warning {
+  constructor(line: number, message: string) {
+    this.line = line;
+    this.message = message;
+  }
+
+  line: number;
+  message: string;
+}

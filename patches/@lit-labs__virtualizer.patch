@@ -1,0 +1,15 @@
+diff --git a/Virtualizer.js b/Virtualizer.js
+index 09f29a6a74be70c2916674e103b9b18464939758..670d066f3e121b8a4ece995a026fac7dbfdddecc 100644
+--- a/Virtualizer.js
++++ b/Virtualizer.js
+@@ -481,8 +481,8 @@ export class Virtualizer {
+             };
+             const scrollTop = top - hostElementBounds.top + hostElement.scrollTop;
+             const scrollLeft = left - hostElementBounds.left + hostElement.scrollLeft;
+-            const height = Math.max(0, bottom - top);
+-            const width = Math.max(0, right - left);
++            const height = Math.max(0, Math.min(bottom - top, hostElement.clientHeight));
++            const width = Math.max(0, Math.min(right - left, hostElement.clientWidth));
+             layout.viewportSize = { width, height };
+             layout.viewportScroll = { top: scrollTop, left: scrollLeft };
+             layout.totalScrollSize = totalScrollSize;
