@@ -73,8 +73,8 @@ export class GlyphListView extends LitElement {
                     @click=${() => this.selectedIndex = index}
                 ></glyph-list-item>`}
                 .layout=${grid({
-                    itemSize: { width: `${itemWidth+1}px`, height: "73px" },
-                    gap: '-1px',
+                    itemSize: { width: `${itemWidth+2}px`, height: "74px" },
+                    gap: '0px',
                 })}
             ></lit-virtualizer>
         `
