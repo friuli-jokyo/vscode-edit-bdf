@@ -52,14 +52,12 @@ export class GlyphListItem extends LitElement {
         }
         :host > * {
             position: absolute;
-            justify-self: anchor-center;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
         }
-        :host > :first-child {
-            top: 0;
+        div {
             font-size: 16px;
-        }
-        :host > :last-child {
-            bottom: 0;
         }
         canvas {
             image-rendering: pixelated;
