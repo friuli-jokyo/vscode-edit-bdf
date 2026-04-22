@@ -9,11 +9,13 @@ export class GlyphListItem extends LitElement {
     @property({ type: Object }) glyph: Glyph | null = null;
     @property({ type: Object }) fontBoundingBox: BoundingBox | null = null;
     @property({ type: Boolean }) selected = false;
-    @query('#thumbnail') canvas!: HTMLCanvasElement;
+    @query('canvas') canvas!: HTMLCanvasElement;
 
     drawThumbnail() {
         const ctx = this.canvas.getContext("2d");
         if (!ctx || !this.glyph) return;
+        this.canvas.width = this.glyph.boundingBox.width;
+        this.canvas.height = this.glyph.boundingBox.height;
         ctx.fillStyle = fillColor;
         for (let dy = 0; dy < this.glyph.bitmap.length; dy++) {
             const rowStr = this.glyph.bitmap[dy];
@@ -85,11 +87,7 @@ export class GlyphListItem extends LitElement {
         }
         return html`
             <div>${char}</div>
-            <canvas
-                id="thumbnail"
-                width="${this.glyph?.boundingBox.width ?? 0}"
-                height="${this.glyph?.boundingBox.height ?? 0}"    
-            ></canvas>
+            <canvas></canvas>
         `
     }
 }

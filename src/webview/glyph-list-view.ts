@@ -15,7 +15,7 @@ vscode.postMessage({ type: "requestRefresh" });
 
 @customElement("glyph-list-view")
 export class GlyphListView extends LitElement {
-    @property({ type: Object }) font: BDFFont | null = null;
+    @state() font: BDFFont | null = null;
     @state() private selectedIndex: number | null = null;
 
     constructor() {
@@ -50,14 +50,14 @@ export class GlyphListView extends LitElement {
     `;
 
     render() {
+        if (!this.font) {
+            return html`<div style="padding: 1em;">No font loaded.</div>`;
+        }
         const maxDWidth = Math.max(
             ...(this.font?.glyphs.map(g => g.dWidth?.x || 0) ?? [0]),
             this.font?.dWidth?.x ?? 0
         );
-        let itemWidth = maxDWidth * 48 / (this.font?.fontBoundingBox.height ?? 1);
-        if (itemWidth < 48 / 2) {
-            itemWidth = 48 / 2;
-        }
+        const itemWidth = Math.max(maxDWidth * 48 / (this.font?.fontBoundingBox.height ?? 1), 48 / 2);
         return html`
             <glyph-info-header
                 glyphNumber=${this.selectedIndex}
